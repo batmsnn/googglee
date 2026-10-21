@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecrin Google'u (Aşkım) - Özel Arama Motoru</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Pacifico&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Quicksand', sans-serif;
+            overflow-x: hidden;
+            user-select: none;
+            background-color: #ff758c;
+        }
+
+        /* Animated Background Canvas */
+        #starCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 35%, #fd79a8 70%, #e84393 100%);
+        }
+
+        /* Glassmorphism Styling */
+        .glass-box {
+            background: rgba(255, 255, 255, 0.28);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1.5px solid rgba(255, 255, 255, 0.45);
+            box-shadow: 0 10px 35px 0 rgba(232, 67, 147, 0.3);
+        }
+
+        .glass-input {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-input:focus-within {
+            background: rgba(255, 255, 255, 1);
+            border-color: #ff007f;
+            box-shadow: 0 0 30px rgba(255, 0, 127, 0.5), 0 0 10px rgba(255, 215, 0, 0.6);
+            transform: translateY(-2px);
+        }
+
+        /* Google Title Gradient & Styling */
+        .logo-title {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -1px;
+            filter: drop-shadow(0 6px 15px rgba(214, 51, 132, 0.4));
+        }
+
+        .heart-badge {
+            font-family: 'Pacifico', cursive;
+            background: linear-gradient(45deg, #ff007f, #ff6b81, #ffd700);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+
+        /* Cute Button Hover Effects */
+        .pink-btn {
+            background: linear-gradient(135deg, #ffffff 0%, #fff0f5 100%);
+            color: #d63384;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .pink-btn:hover {
+            transform: translateY(-3px) scale(1.04);
+            background: linear-gradient(135deg, #ff007f 0%, #ff66a3 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 0, 127, 0.45);
+        }
+
+        .gold-btn {
+            background: linear-gradient(135deg, #fff3bf 0%, #ffe066 100%);
+            color: #b58100;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .gold-btn:hover {
+            transform: translateY(-3px) scale(1.04);
+            background: linear-gradient(135deg, #ffd700 0%, #ffae00 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Floating Animation */
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(6deg); }
+        }
+
+        .float-anim {
+            animation: floatSlow 3.8s ease-in-out infinite;
+        }
+
+        .float-anim-reverse {
+            animation: floatSlow 4.5s ease-in-out infinite reverse;
+        }
+
+        /* Glowing Pulse */
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8)); }
+            50% { filter: drop-shadow(0 0 20px rgba(255, 0, 127, 0.9)); }
+        }
+
+        .glow-icon {
+            animation: pulseGlow 2.5s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-gray-800 relative select-none">
+
+    <!-- Interactive Animated Starry Pink & Gold Canvas -->
+    <canvas id="starCanvas"></canvas>
+
+    <!-- Main Wrapper -->
+    <div class="relative z-10 min-h-screen flex flex-col justify-between">
+        
+        <!-- Header Navigation -->
+        <header class="w-full p-4 md:p-6 flex justify-between items-center max-w-7xl mx-auto">
+            <div class="flex items-center gap-2">
+                <span class="glass-box px-4 py-2 rounded-full text-xs md:text-sm font-extrabold text-white flex items-center gap-2 shadow-lg">
+                    <i class="fa-solid fa-crown text-yellow-300 animate-bounce"></i> Ecrin'in Özel Google'ı ✨
+                </span>
+            </div>
+            
+            <div class="flex items-center gap-3 sm:gap-5 text-sm font-bold text-white">
+                <button onclick="directGoogleSearch('images')" class="hover:text-yellow-200 transition duration-200 flex items-center gap-1.5 drop-shadow">
+                    <i class="fa-solid fa-image text-xs"></i> Görseller
+                </button>
+                <button onclick="directGoogleSearch('maps')" class="hover:text-yellow-200 transition duration-200 flex items-center gap-1.5 drop-shadow">
+                    <i class="fa-solid fa-map-location-dot text-xs"></i> Haritalar
+                </button>
+                <button onclick="toggleLoveModal()" class="glass-box p-2.5 rounded-full hover:bg-white/40 transition duration-300 relative group text-white">
+                    <i class="fa-solid fa-heart text-pink-300 text-base animate-pulse"></i>
+                    <span class="absolute right-0 top-12 hidden group-hover:block bg-white text-pink-600 text-xs px-3 py-1.5 rounded-xl shadow-xl whitespace-nowrap font-bold">
+                        Seni Çok Seviyorum 💖
+                    </span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Search Content -->
+        <main class="w-full max-w-3xl mx-auto px-4 flex flex-col items-center my-auto text-center">
+            
+            <!-- Logo Section -->
+            <div class="mb-7 relative flex flex-col items-center">
+                <!-- Floating Decorative Icons -->
+                <i class="fa-solid fa-wand-magic-sparkles text-yellow-300 text-3xl absolute -top-8 -left-12 float-anim glow-icon"></i>
+                <i class="fa-solid fa-heart text-pink-300 text-2xl absolute -bottom-2 -right-10 float-anim-reverse"></i>
+                <i class="fa-solid fa-star text-amber-200 text-xl absolute top-1 -right-12 float-anim"></i>
+
+                <!-- Colorful "Ecrin Google'u" Branding -->
+                <h1 class="logo-title text-4xl sm:text-6xl md:text-7xl font-black tracking-tight text-white flex items-center justify-center flex-wrap gap-1">
+                    <span class="text-white drop-shadow-md">E</span><span class="text-pink-200">c</span><span class="text-pink-100">r</span><span class="text-white">i</span><span class="text-pink-200">n</span>
+                    <span class="ml-2 text-white">G</span><span class="text-pink-200">o</span><span class="text-yellow-200">o</span><span class="text-white">g</span><span class="text-pink-200">l</span><span class="text-white">e</span><span class="text-pink-200">'</span><span class="text-white">u</span>
+                </h1>
+                
+                <!-- Subtitle Badge -->
+                <div class="mt-3 glass-box px-6 py-1.5 rounded-full shadow-lg inline-block transform hover:scale-105 transition cursor-pointer" onclick="toggleLoveModal()">
+                    <span class="heart-badge text-xl sm:text-2xl font-bold tracking-wide">
+                        (Aşkım 💕)
+                    </span>
+                </div>
+            </div>
+
+            <!-- Main Google Search Form -->
+            <form action="https://www.google.com/search" method="GET" target="_blank" class="w-full relative max-w-2xl">
+                <div class="glass-input rounded-full flex items-center px-5 py-3.5 sm:py-4 shadow-2xl">
+                    <i class="fa-solid fa-magnifying-glass text-pink-500 text-lg sm:text-xl mr-3"></i>
+                    
+                    <input 
+                        type="text" 
+                        name="q"
+                        id="searchInput" 
+                        placeholder="Google'da veya web'de aratmak istediğin her şeyi yaz..." 
+                        class="w-full bg-transparent outline-none text-gray-900 placeholder-pink-400/90 font-bold text-base sm:text-lg"
+                        autofocus
+                        autocomplete="off"
+                        required
+                    />
+
+                    <!-- Speech / Voice Input Simulation -->
+                    <button type="button" onclick="handleVoiceSearch()" class="text-pink-400 hover:text-pink-600 transition p-2 rounded-full ml-1" title="Sesli Arama">
+                        <i class="fa-solid fa-microphone text-lg hover:scale-110 transition-transform"></i>
+                    </button>
+                    
+                    <!-- Magic Star Shower Burst Button -->
+                    <button type="button" onclick="triggerMagicShower()" class="text-amber-400 hover:text-amber-500 transition p-2 rounded-full ml-1" title="Sihirli Yıldız Yağmuru">
+                        <i class="fa-solid fa-sparkles text-lg hover:rotate-45 transition-transform"></i>
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-wrap justify-center gap-3 sm:gap-4">
+                    <button 
+                        type="submit" 
+                        class="pink-btn px-7 py-3.5 rounded-full font-extrabold text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                        <i class="fa-brands fa-google text-pink-500"></i> Google'da Ara
+                    </button>
+                    
+                    <button 
+                        type="submit" 
+                        name="btnI" 
+                        value="1"
+                        class="gold-btn px-7 py-3.5 rounded-full font-extrabold text-sm sm:text-base flex items-center gap-2 cursor-pointer">
+                        <i class="fa-solid fa-clover text-amber-600"></i> Kendimi Şanslı Hissediyorum
+                    </button>
+                </div>
+            </form>
+
+            <!-- Pink-Themed Quick Site Shortcuts -->
+            <div class="mt-10 grid grid-cols-4 sm:grid-cols-5 gap-3 sm:gap-5 w-full max-w-xl">
+                <a href="https://www.youtube.com" target="_blank" class="glass-box p-3 rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition duration-300 text-white group shadow-md">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-500/90 flex items-center justify-center mb-1.5 shadow-md group-hover:scale-110 transition">
+                        <i class="fa-brands fa-youtube text-xl text-white"></i>
+                    </div>
+                    <span class="text-xs font-bold">YouTube</span>
+                </a>
+
+                <a href="https://www.instagram.com" target="_blank" class="glass-box p-3 rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition duration-300 text-white group shadow-md">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-gradient-to-tr from-amber-500 via-rose-500 to-purple-600 flex items-center justify-center mb-1.5 shadow-md group-hover:scale-110 transition">
+                        <i class="fa-brands fa-instagram text-xl text-white"></i>
+                    </div>
+                    <span class="text-xs font-bold">Instagram</span>
+                </a>
+
+                <a href="https://www.tiktok.com" target="_blank" class="glass-box p-3 rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition duration-300 text-white group shadow-md">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/80 flex items-center justify-center mb-1.5 shadow-md group-hover:scale-110 transition">
+                        <i class="fa-brands fa-tiktok text-xl text-white"></i>
+                    </div>
+                    <span class="text-xs font-bold">TikTok</span>
+                </a>
+
+                <a href="https://www.netflix.com" target="_blank" class="glass-box p-3 rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition duration-300 text-white group shadow-md">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-red-700 flex items-center justify-center mb-1.5 shadow-md group-hover:scale-110 transition">
+                        <i class="fa-solid fa-play text-lg text-white"></i>
+                    </div>
+                    <span class="text-xs font-bold">Netflix</span>
+                </a>
+
+                <a href="https://open.spotify.com" target="_blank" class="glass-box p-3 rounded-2xl flex flex-col items-center justify-center hover:bg-white/40 transition duration-300 text-white group shadow-md col-span-4 sm:col-span-1">
+                    <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-emerald-500/90 flex items-center justify-center mb-1.5 shadow-md group-hover:scale-110 transition">
+                        <i class="fa-brands fa-spotify text-xl text-white"></i>
+                    </div>
+                    <span class="text-xs font-bold">Spotify</span>
+                </a>
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full glass-box mt-auto border-t border-white/30 text-white text-xs sm:text-sm py-4 px-6">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-center sm:text-left">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-pink-300 animate-bounce"></i>
+                    <span class="font-bold">Ecrin için özel pembe ve altın kayan yıldızlı Google versiyonu 💕</span>
+                </div>
+                <div class="flex gap-4 font-bold text-white/95">
+                    <a href="https://www.google.com/about/" target="_blank" class="hover:underline">Hakkında</a>
+                    <a href="https://policies.google.com/privacy" target="_blank" class="hover:underline">Gizlilik</a>
+                    <a href="https://policies.google.com/terms" target="_blank" class="hover:underline">Şartlar</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Love Message Modal -->
+    <div id="loveModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm hidden opacity-0 transition-opacity duration-300">
+        <div class="glass-box p-6 sm:p-8 rounded-3xl max-w-sm w-full mx-4 text-center text-white shadow-2xl relative border-2 border-white/60">
+            <button onclick="toggleLoveModal()" class="absolute top-3 right-4 text-white/80 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-16 h-16 bg-gradient-to-tr from-pink-500 to-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce shadow-lg">
+                <i class="fa-solid fa-crown text-3xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-black mb-2 drop-shadow">Aşkım Ecrin! 💕</h3>
+            <p class="text-sm font-semibold leading-relaxed text-white/95 mb-6">
+                Bu özel arama motoru senin için pembe ve altın yıldızlarla donatıldı! Merak ettiğin her şeyi yazıp aratabilirsin, tüm dünyadaki sonuçlar anında karşına çıkar! ✨👑
+            </p>
+            <button onclick="toggleLoveModal()" class="w-full pink-btn py-3 rounded-xl font-extrabold shadow-lg">
+                Seni Sonsuza Dek Seviyorum! 🥰
+            </button>
+        </div>
+    </div>
+
+    <script>
+        /* Pink & Gold Animated Canvas background */
+        const canvas = document.getElementById('starCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let stars = [];
+        let shootingStars = [];
+        let mouse = { x: null, y: null, radius: 140 };
+
+        function initCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            stars = [];
+            
+            const count = Math.floor((width * height) / 3000);
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    size: Math.random() * 2.8 + 0.6,
+                    alpha: Math.random() * 0.8 + 0.2,
+                    speedAlpha: Math.random() * 0.02 + 0.008,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5 - 0.2,
+                    color: ['#ffffff', '#fff0f5', '#ffd700', '#ffe4e1', '#ffb6c1', '#ffd1dc'][Math.floor(Math.random() * 6)]
+                });
+            }
+        }
+
+        function createShootingStar() {
+            if (Math.random() < 0.06) {
+                shootingStars.push({
+                    x: Math.random() * width * 1.3 - width * 0.1,
+                    y: Math.random() * (height * 0.4),
+                    length: Math.random() * 100 + 50,
+                    speed: Math.random() * 7 + 5,
+                    angle: Math.PI / 4,
+                    alpha: 1,
+                    width: Math.random() * 2.5 + 1,
+                    color: Math.random() > 0.4 ? '#ffffff' : '#ffd700'
+                });
+            }
+        }
+
+        function drawStars() {
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#ff758c');
+            gradient.addColorStop(0.35, '#ff7eb3');
+            gradient.addColorStop(0.7, '#fd79a8');
+            gradient.addColorStop(1, '#e84393');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Draw Stars
+            stars.forEach(star => {
+                star.alpha += star.speedAlpha;
+                if (star.alpha > 0.98 || star.alpha < 0.15) {
+                    star.speedAlpha = -star.speedAlpha;
+                }
+
+                star.x += star.vx;
+                star.y += star.vy;
+
+                if (star.x < 0) star.x = width;
+                if (star.x > width) star.x = 0;
+                if (star.y < 0) star.y = height;
+                if (star.y > height) star.y = 0;
+
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - star.x;
+                    let dy = mouse.y - star.y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouse.radius) {
+                        let force = (mouse.radius - dist) / mouse.radius;
+                        star.x -= (dx / dist) * force * 4;
+                        star.y -= (dy / dist) * force * 4;
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.globalAlpha = Math.max(0, Math.min(1, star.alpha));
+                ctx.shadowBlur = star.color === '#ffd700' ? 8 : star.size * 3;
+                ctx.shadowColor = star.color;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Draw Shooting Stars
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                let s = shootingStars[i];
+                let endX = s.x - Math.cos(s.angle) * s.length;
+                let endY = s.y + Math.sin(s.angle) * s.length;
+
+                let starGrad = ctx.createLinearGradient(s.x, s.y, endX, endY);
+                starGrad.addColorStop(0, s.color);
+                starGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+                ctx.beginPath();
+                ctx.moveTo(s.x, s.y);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = starGrad;
+                ctx.lineWidth = s.width;
+                ctx.stroke();
+
+                s.x += Math.cos(s.angle) * s.speed;
+                s.y += Math.sin(s.angle) * s.speed;
+                s.alpha -= 0.012;
+
+                if (s.alpha <= 0 || s.x > width || s.y > height) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+
+            ctx.globalAlpha = 1;
+            createShootingStar();
+            requestAnimationFrame(drawStars);
+        }
+
+        window.addEventListener('resize', initCanvas);
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+        window.addEventListener('mouseleave', () => {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        function directGoogleSearch(type) {
+            const query = document.getElementById('searchInput').value.trim() || 'sevimli pembe duvar kağıtları';
+            if (type === 'images') {
+                window.open(`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(query)}`, '_blank');
+            } else if (type === 'maps') {
+                window.open(`https://www.google.com/maps/search/${encodeURIComponent(query)}`, '_blank');
+            }
+        }
+
+        function triggerMagicShower() {
+            for (let i = 0; i < 40; i++) {
+                stars.push({
+                    x: window.innerWidth / 2 + (Math.random() - 0.5) * 400,
+                    y: window.innerHeight / 2 + (Math.random() - 0.5) * 200,
+                    size: Math.random() * 4.5 + 2,
+                    alpha: 1,
+                    speedAlpha: -0.015,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    color: Math.random() > 0.5 ? '#ffd700' : '#ffffff'
+                });
+            }
+        }
+
+        function handleVoiceSearch() {
+            const input = document.getElementById('searchInput');
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'tr-TR';
+                input.placeholder = "Dinleniyor... Konuş aşkım 💕";
+                recognition.start();
+
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    input.value = transcript;
+                    input.closest('form').submit();
+                };
+
+                recognition.onerror = function() {
+                    input.placeholder = "Google'da veya web'de aratmak istediğin her şeyi yaz...";
+                };
+            } else {
+                input.value = "Seni çok seviyorum Ecrin!";
+                input.closest('form').submit();
+            }
+        }
+
+        function toggleLoveModal() {
+            const modal = document.getElementById('loveModal');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                setTimeout(() => modal.classList.remove('opacity-0'), 10);
+            } else {
+                modal.classList.add('opacity-0');
+                setTimeout(() => modal.classList.add('hidden'), 300);
+            }
+        }
+
+        window.onload = function() {
+            initCanvas();
+            drawStars();
+        };
+    </script>
+</body>
+</html>
